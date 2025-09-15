@@ -1,0 +1,207 @@
+{
+  "name": "en-hi",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "21c56360-dd4e-4cca-9bb1-e72a6828ceda",
+      "name": "Telegram Trigger",
+      "webhookId": "ab57283c-15bd-4ded-aed8-b38bbaed551d",
+      "credentials": {
+        "telegramApi": {
+          "id": "yCc26MMj5YqwjTyQ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "cd3605b2-d2d1-4dcf-b12e-a89977d696b8",
+      "name": "Get a file",
+      "webhookId": "188cbbc6-4538-4669-a853-daa191f8df17",
+      "credentials": {
+        "telegramApi": {
+          "id": "yCc26MMj5YqwjTyQ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        432,
+        0
+      ],
+      "id": "078ea43e-a3e1-4fe5-bd24-563adf163484",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "57an14dAvvvKSAkA",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "text": "={{ $json.text }}",
+        "translateTo": "hi"
+      },
+      "type": "n8n-nodes-base.googleTranslate",
+      "typeVersion": 2,
+      "position": [
+        656,
+        0
+      ],
+      "id": "24949bcd-7b27-497e-92bb-974507bfb827",
+      "name": "Translate a language",
+      "credentials": {
+        "googleApi": {
+          "id": "IArv94hE4h1atA0B",
+          "name": "Google Translate account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "input": "={{ $json.translatedText }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        880,
+        0
+      ],
+      "id": "d882ae3b-202b-481f-acc1-843d9cf4dceb",
+      "name": "Generate audio",
+      "credentials": {
+        "openAiApi": {
+          "id": "57an14dAvvvKSAkA",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        0
+      ],
+      "id": "53f23501-246d-4860-89bd-89b57541692b",
+      "name": "Send an audio file",
+      "webhookId": "0a635de3-4619-49ed-bcb2-5727ef9c04f0",
+      "credentials": {
+        "telegramApi": {
+          "id": "yCc26MMj5YqwjTyQ",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Translate a language",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Translate a language": {
+      "main": [
+        [
+          {
+            "node": "Generate audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate audio": {
+      "main": [
+        [
+          {
+            "node": "Send an audio file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d57dff9f-42bf-4f8b-b121-f3b32ad6ec17",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e05369e50a1da4c1794b183eeeef7f3f1d79aa599b96d6042b8ed1899966a4ef"
+  },
+  "id": "QNEdtGRUCfJQ0F6V",
+  "tags": []
+}
